@@ -5,7 +5,15 @@
 // זו לא רשימה מלאה! בשלב ב' הרשימות ייקראו חיות מהגיליון וכל ערך חדש יופיע אוטומטית.
 
 import "server-only";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { emptyOverrides, sanitizeOverrides } from "../lists";
+import type { ListOverrides } from "../types";
 import type { SheetProvider } from "./provider";
+
+// במצב דמו ההתאמות האישיות נשמרות בקובץ מקומי (לא נכנס ל-git).
+// הערה: בפריסה ל-Vercel הקובץ זמני ונמחק בכל פריסה — בשלב ב' האחסון עובר ללשונית המיפויים בגיליון.
+const OVERRIDES_PATH = path.join(process.cwd(), "data", "list-overrides.json");
 
 const DEMO_PROJECTS = [
   "אדרי ירושלים",
@@ -123,5 +131,19 @@ export const demoProvider: SheetProvider = {
 
   async saveMappings() {
     // אין למידה בשלב א'
+  },
+
+  async getListOverrides(): Promise<ListOverrides> {
+    try {
+      const raw = await fs.readFile(OVERRIDES_PATH, "utf8");
+      return sanitizeOverrides(JSON.parse(raw));
+    } catch {
+      return emptyOverrides();
+    }
+  },
+
+  async saveListOverrides(overrides: ListOverrides): Promise<void> {
+    await fs.mkdir(path.dirname(OVERRIDES_PATH), { recursive: true });
+    await fs.writeFile(OVERRIDES_PATH, JSON.stringify(overrides, null, 2), "utf8");
   },
 };

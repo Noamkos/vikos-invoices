@@ -30,6 +30,15 @@ export type Extracted = {
 
 export type Lists = { projects: string[]; workTypes: string[]; suppliers: string[] };
 
+export type ListKind = "projects" | "workTypes" | "suppliers";
+
+// התאמות אישיות לרשימות ההשלמה: ערכים שנוספו ידנית וערכים שהוסתרו.
+// משפיעות אך ורק על מה שהאתר מציע — לא נוגעות בנתוני הטבלה עצמה.
+export type ListOverrides = {
+  added: Record<ListKind, string[]>;
+  hidden: Record<ListKind, string[]>;
+};
+
 export type Mappings = {
   aliases: Record<string, string>; // שם רשמי מנורמל -> שם מוכר בטבלה
   addresses: Record<string, string>; // רמז כתובת מנורמל -> פרויקט

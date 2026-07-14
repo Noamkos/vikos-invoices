@@ -168,11 +168,20 @@ export default function Home() {
           <h1 className="text-2xl font-bold text-zinc-900">קליטת חשבוניות</h1>
           <p className="text-sm text-zinc-500">ויקוס הנדסה</p>
         </div>
-        {phase.name === "confirm" && phase.data?.mock && (
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
-            מצב הדגמה — אין מפתח API
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {phase.name === "confirm" && phase.data?.mock && (
+            <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+              מצב הדגמה — אין מפתח API
+            </span>
+          )}
+          <a
+            href="/settings"
+            className="rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+            title="ניהול רשימות ההשלמה"
+          >
+            ⚙️ רשימות
+          </a>
+        </div>
       </header>
 
       {phase.name === "idle" && (

@@ -36,6 +36,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `lib/row.ts` — מקור האמת היחיד לסדר עמודות A-Q.
 - `lib/sheets/provider.ts` — ה"חוזה" של שכבת הגיליון; `demo.ts` המימוש הנוכחי; `google.ts` ייכתב בשלב ב'.
 - `app/api/extract/route.ts` — POST חילוץ, GET רשימות (למילוי ידני). `app/api/confirm/route.ts` — אישור והוספה.
+- `app/settings/page.tsx` + `app/api/settings/route.ts` — מסך "⚙️ רשימות": הוספה/הסתרה של ערכים בהשלמה האוטומטית. משפיע רק על ההצעות (כולל הרשימות שנשלחות למודל), לא על אימות ולא על הטבלה. הלוגיקה הטהורה ב-`lib/lists.ts`; האחסון במצב דמו: `data/list-overrides.json` (מחוץ ל-git; ב-Vercel הקובץ זמני — בשלב ב' עובר ללשונית המיפויים).
+- זיהוי "נגמרו הטוקנים": `lib/extraction.ts` מזהה שגיאת credit balance ומחזיר קוד `no_credits` ← המסך מציג "נגמרו הטוקנים של Claude!" ונופל למילוי ידני. אין דרך לדעת מראש שהקרדיט עומד להיגמר (Anthropic לא חושפת יתרה ב-API) — לכן מומלץ להגדיר התראת מייל ב-Console.
 - `app/page.tsx` — מכונת המצבים של המסך. `components/` — הרכיבים.
 - `scripts/test-extract.mjs` — בדיקת חילוץ מהטרמינל (דורש `npm run dev` רץ).
 - `scripts/test-logic.mts` — בדיקות רגרסיה ללוגיקה הטהורה (`npx tsx scripts/test-logic.mts`) — להריץ אחרי כל שינוי ב-lib/. 28 בדיקות, כולן חייבות לעבור.

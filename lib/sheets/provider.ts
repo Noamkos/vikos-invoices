@@ -2,7 +2,7 @@
 // ולא יודע אם מאחוריו עומד מצב דמו (שלב א') או Google Sheets אמיתי (שלב ב').
 
 import "server-only";
-import type { Lists, Mappings } from "../types";
+import type { ListOverrides, Lists, Mappings } from "../types";
 import { demoProvider } from "./demo";
 
 export type DuplicateHit = { row: number; month: string; year: number };
@@ -21,6 +21,9 @@ export interface SheetProvider {
   // הכתיבה היחידה שקיימת במערכת: הוספת שורה חדשה בסוף. אין עדכון ואין מחיקה.
   appendRow(row: (string | number)[]): Promise<{ row: number | null }>;
   saveMappings(learned: LearnedMapping): Promise<void>;
+  // התאמות אישיות לרשימות ההשלמה (הוספה/הסתרה) — משפיעות רק על ההצעות באתר
+  getListOverrides(): Promise<ListOverrides>;
+  saveListOverrides(overrides: ListOverrides): Promise<void>;
 }
 
 export function getProvider(): SheetProvider {

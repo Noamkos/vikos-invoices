@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.local.example
 
+# הגדרות מקומיות של רשימות ההשלמה (נשמרות מקומית במצב דמו)
+/data/
+
 # vercel
 .vercel
 

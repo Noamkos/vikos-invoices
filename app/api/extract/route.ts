@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ExtractionError, extractInvoice, type InputFile } from "@/lib/extraction";
 import { resolveSuggestions } from "@/lib/crossref";
+import { suggestionLists } from "@/lib/lists";
 import { reconcileAmounts } from "@/lib/validate";
 import { getProvider } from "@/lib/sheets/provider";
 import type { ExtractResponse } from "@/lib/types";
@@ -29,7 +30,12 @@ function fail(status: number, error: string, message: string) {
 // GET — מחזיר רק את הרשימות, למצב מילוי ידני (כשהחילוץ נכשל והטופס נפתח ריק)
 export async function GET() {
   try {
-    const lists = await getProvider().getLists();
+    const provider = getProvider();
+    const [base, overrides] = await Promise.all([
+      provider.getLists(),
+      provider.getListOverrides(),
+    ]);
+    const lists = suggestionLists(base, overrides);
     return NextResponse.json({ ok: true, lists });
   } catch (err) {
     console.error("[VIKOS] lists error:", err);
@@ -95,10 +101,13 @@ export async function POST(req: NextRequest) {
     );
 
     const provider = getProvider();
-    const [lists, mappings] = await Promise.all([
+    const [base, mappings, overrides] = await Promise.all([
       provider.getLists(),
       provider.getMappings(),
+      provider.getListOverrides(),
     ]);
+    // הרשימות בפועל: אחרי הוספות והסתרות שהוגדרו במסך ההגדרות
+    const lists = suggestionLists(base, overrides);
 
     const { extracted, mock } = await extractInvoice(inputs, lists);
 
@@ -129,6 +138,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(body);
   } catch (err) {
     if (err instanceof ExtractionError) {
+      if (err.code === "no_credits") {
+        return fail(
+          402,
+          "no_credits",
+          "נגמרו הטוקנים של Claude! החילוץ האוטומטי מושבת עד לטעינת קרדיט חדש ב-console.anthropic.com (Billing ← Buy credits). בינתיים אפשר למלא את הפרטים ידנית",
+        );
+      }
+      if (err.code === "bad_key") {
+        return fail(
+          500,
+          "bad_key",
+          "מפתח ה-API של Claude אינו תקין — יש לבדוק את ANTHROPIC_API_KEY. בינתיים אפשר למלא ידנית",
+        );
+      }
       if (err.code === "refusal") {
         return fail(422, "refusal", "לא ניתן היה לעבד את הקובץ — אפשר למלא את הפרטים ידנית");
       }

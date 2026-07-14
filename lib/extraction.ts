@@ -9,9 +9,16 @@ import type { Extracted, Lists } from "./types";
 export const EXTRACTION_MODEL = "claude-sonnet-5";
 const MAX_OUTPUT_TOKENS = 2048;
 
+export type ExtractionErrorCode =
+  | "refusal"
+  | "truncated"
+  | "no_credits"
+  | "bad_key"
+  | "api_error";
+
 export class ExtractionError extends Error {
-  code: "refusal" | "truncated" | "api_error";
-  constructor(code: "refusal" | "truncated" | "api_error", message: string) {
+  code: ExtractionErrorCode;
+  constructor(code: ExtractionErrorCode, message: string) {
     super(message);
     this.code = code;
   }
@@ -185,6 +192,16 @@ export async function extractInvoice(
       ],
     });
   } catch (err) {
+    // זיהוי מצבים שדורשים הודעה ספציפית למשתמשת
+    if (err instanceof Anthropic.APIError) {
+      const msg = (err.message || "").toLowerCase();
+      if (msg.includes("credit balance") || msg.includes("billing")) {
+        throw new ExtractionError("no_credits", "נגמר הקרדיט בחשבון Anthropic");
+      }
+      if (err.status === 401) {
+        throw new ExtractionError("bad_key", "מפתח ה-API אינו תקין");
+      }
+    }
     const msg = err instanceof Error ? err.message : String(err);
     throw new ExtractionError("api_error", msg);
   }

@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateConfirm } from "@/lib/validate";
 import { buildRow, buildRowPreview } from "@/lib/row";
+import { validationLists } from "@/lib/lists";
 import { getProvider } from "@/lib/sheets/provider";
 import type { ConfirmRequest, ConfirmResponse } from "@/lib/types";
 
@@ -21,7 +22,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const provider = getProvider();
-    const lists = await provider.getLists();
+    const [base, overrides] = await Promise.all([
+      provider.getLists(),
+      provider.getListOverrides(),
+    ]);
+    // באימות: בסיס + מה שנוסף ידנית. ערך שהוסתר עדיין תקין (ההסתרה משפיעה רק על ההצעות)
+    const lists = validationLists(base, overrides);
 
     // ספק חדש מותר גם אם אינו ברשימה — מוסיפים אותו זמנית לרשימת האימות
     const listsForValidation = body.supplierIsNew
