@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# מערכת קליטת חשבוניות — ויקוס הנדסה
 
-## Getting Started
+מעלים חשבונית ספק (PDF או צילום) ← Claude מחלץ את הנתונים ← מסך אישור בעברית ← שורה חדשה בטבלת "בסיס נתונים" ב-Google Sheets.
 
-First, run the development server:
+**סטטוס: שלב א' — הדגמה.** אין עדיין כתיבה לגיליון ואין התחברות. מסמכי היסוד (אפיון + תוכנית בנייה) בתיקייה שמעל.
 
-```bash
+## איך מריצים במחשב
+
+```
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ואז לפתוח בדפדפן: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## מצבי עבודה
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **בלי מפתח API** (המצב הנוכחי): המסך עובד מקצה לקצה עם חילוץ לדוגמה — רואים תג "מצב הדגמה" צהוב למעלה.
+- **עם מפתח API**: לפתוח את הקובץ `.env.local`, להדביק את המפתח אחרי `ANTHROPIC_API_KEY=`, ולהפעיל מחדש את `npm run dev`. מאותו רגע החילוץ אמיתי.
 
-## Learn More
+איך משיגים מפתח: console.anthropic.com ← Billing ← Buy credits (מינימום 5$, תשלום חד-פעמי, בלי מנוי) ← API Keys ← Create Key.
 
-To learn more about Next.js, take a look at the following resources:
+## בדיקת דיוק על חשבוניות אמיתיות (בלי מסך)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+כשהשרת רץ (`npm run dev` בטרמינל אחד), בטרמינל שני:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+node scripts/test-extract.mjs path\to\invoice.pdf
+node scripts/test-extract.mjs page1.jpg page2.jpg
+```
 
-## Deploy on Vercel
+מדפיס את כל מה שחולץ + כמה זמן לקח.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## לפני ההדגמה לויקי
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. להזין מפתח API ב-.env.local (ראו למעלה).
+2. להחליף את הרשימות הזמניות בקובץ `lib/sheets/demo.ts` (פרויקטים, סוגי עבודה, ספקים) בערכים האמיתיים מהטבלה של ויקי.
+3. לבדוק עם 6-8 חשבוניות אמיתיות דרך `scripts/test-extract.mjs`.
