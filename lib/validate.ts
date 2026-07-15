@@ -4,6 +4,7 @@
 // 3. escapeCellText — הגנה מפני ערכים שגיליון היה "מתקן" או מפרש כנוסחה.
 
 import { HEBREW_MONTHS } from "./hebrew-dates";
+import { normalizeName } from "./crossref";
 import type { ConfirmRequest, Extracted, Lists, Warning } from "./types";
 
 const ILS_CODES = new Set(["ILS", "NIS", "SHEKEL"]);
@@ -197,6 +198,27 @@ export function validateConfirm(
     errors.classification = "ארוך מדי (עד 120 תווים)";
 
   return errors;
+}
+
+// ---- כפילות בתוך התור עצמו ----
+
+export type BatchDuplicate = { first: number; second: number };
+
+// שתי חשבוניות זהות (אותו ספק אחרי נרמול + אותו מספר חשבונית) בתוך אותה שליחה —
+// כנראה אותו קובץ הועלה פעמיים. בדיקת הכפילות מול הטבלה לא תופסת את זה,
+// כי אף אחת מהן עוד לא בטבלה. force על הפריט המאוחר = "ידוע לי, להכניס בכל זאת".
+// המדדים שמוחזרים הם מיקומים במערך שהתקבל — המתקשר אחראי למפות אותם חזרה לתור.
+export function findBatchDuplicate(
+  items: Pick<ConfirmRequest, "invoiceNumber" | "supplier" | "force">[],
+): BatchDuplicate | null {
+  const seen = new Map<string, number>();
+  for (const [i, it] of items.entries()) {
+    const key = normalizeName(it.supplier) + "|" + it.invoiceNumber.trim();
+    const first = seen.get(key);
+    if (first !== undefined && !it.force) return { first, second: i };
+    if (first === undefined) seen.set(key, i);
+  }
+  return null;
 }
 
 // הגנה על תאי טקסט: מרכאות מסולסלות מוחלפות בישרות, וערך שמתחיל בתו נוסחה

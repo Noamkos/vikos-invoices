@@ -1,7 +1,7 @@
 // בדיקות לוגיקה מהירות לקבצי lib — בלי שרת ובלי דפדפן.
 // הרצה: npx tsx scripts/test-logic.mts
 
-import { parseAmount, reconcileAmounts, validateConfirm } from "../lib/validate";
+import { findBatchDuplicate, parseAmount, reconcileAmounts, validateConfirm } from "../lib/validate";
 import { normalizeName, matchSupplier } from "../lib/crossref";
 import { buildRow } from "../lib/row";
 import { dateToMonthYear } from "../lib/hebrew-dates";
@@ -105,6 +105,32 @@ check("empty columns are empty strings", row[1] === "" && row[10] === "" && row[
 // 6. תאריכים
 check("dateToMonthYear valid", JSON.stringify(dateToMonthYear("2026-12-05")) === JSON.stringify({ month: "דצמבר", year: 2026 }));
 check("dateToMonthYear garbage -> null", dateToMonthYear("15/06/2026") === null);
+
+// 7. כפילות בתוך תור אחד (findBatchDuplicate) — אותו ספק בכתיב שונה + אותו מספר
+const dupPair = findBatchDuplicate([
+  { supplier: 'סרגיי אינסט בע"מ', invoiceNumber: "50852 ", force: false },
+  { supplier: "אחר לגמרי", invoiceNumber: "50852", force: false },
+  { supplier: "סרגיי אינסט", invoiceNumber: "50852", force: false },
+]);
+check(
+  "batch duplicate found across spelling variants",
+  JSON.stringify(dupPair) === JSON.stringify({ first: 0, second: 2 }),
+  dupPair,
+);
+check(
+  "batch duplicate skipped when second is forced",
+  findBatchDuplicate([
+    { supplier: "ספק א", invoiceNumber: "7", force: false },
+    { supplier: "ספק א", invoiceNumber: "7", force: true },
+  ]) === null,
+);
+check(
+  "no batch duplicate for different numbers",
+  findBatchDuplicate([
+    { supplier: "ספק א", invoiceNumber: "7", force: false },
+    { supplier: "ספק א", invoiceNumber: "8", force: false },
+  ]) === null,
+);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail > 0 ? 1 : 0);

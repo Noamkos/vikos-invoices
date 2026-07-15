@@ -37,6 +37,9 @@ yarn-error.log*
 # הגדרות מקומיות של רשימות ההשלמה (נשמרות מקומית במצב דמו)
 /data/
 
+# ה-worker של pdf.js מועתק לכאן ב-postinstall (scripts/copy-pdf-worker.mjs) — לא נכנס ל-git
+/public/pdf.worker.min.mjs
+
 # vercel
 .vercel
 

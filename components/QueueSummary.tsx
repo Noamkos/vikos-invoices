@@ -1,44 +1,83 @@
 "use client";
 
-// מסך הסיכום בסוף התור: מה נקלט, מה דולג, ופירוט השורות.
+// מסך הסיכום בשני מצבים:
+// review — "רגע לפני הטבלה": כל השורות שאושרו, כל אחת נפתחת לבדיקה וניתנת לעריכה.
+//          שום דבר עוד לא נכתב; כפתור השליחה הוא הרגע היחיד שכותב לטבלה.
+// done   — אחרי הכתיבה: מה נכנס בפועל (כולל מספרי שורות בגיליון).
 
 import type { QueueItem } from "@/app/page";
 
-type Props = { items: QueueItem[]; onReset: () => void };
+type Props = {
+  mode: "review" | "done";
+  items: QueueItem[];
+  demo?: boolean; // done: האם הייתה זו שליחת דמו (שום דבר לא נכתב באמת)
+  sending?: boolean; // review: שליחה בעיצומה
+  error?: string; // review: תקלה בשליחה האחרונה
+  onSend?: () => void; // review
+  onEdit?: (index: number) => void; // review: חזרה לטופס של חשבונית
+  onReset: () => void;
+};
 
-export default function QueueSummary({ items, onReset }: Props) {
-  const done = items.filter((it) => it.status === "done" && it.result);
+export default function QueueSummary({
+  mode,
+  items,
+  demo = false,
+  sending = false,
+  error,
+  onSend,
+  onEdit,
+  onReset,
+}: Props) {
+  const approved = items.filter((it) => it.status === "approved" && it.approved);
+  const toSend = approved.filter((it) => !it.committed);
   const skipped = items.filter((it) => it.status === "skipped");
-  const anyDemo = done.some((it) => it.result?.demo);
+
+  const doneTitle =
+    approved.length === 0
+      ? "לא נקלטו חשבוניות"
+      : approved.length === 1
+        ? "החשבונית נקלטה."
+        : approved.length + " חשבוניות נקלטו.";
+
+  const sendLabel = sending
+    ? "שולחת לטבלה..."
+    : toSend.length === 1
+      ? "שליחת החשבונית לטבלה"
+      : "שליחת " + toSend.length + " החשבוניות לטבלה";
 
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-10 text-center">
-        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#e0a339]">
-          <svg
-            viewBox="0 0 24 24"
-            className="h-7 w-7 text-white"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        </div>
+        {mode === "done" && (
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#e0a339]">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-7 w-7 text-white"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </div>
+        )}
         <h2 className="text-4xl font-semibold tracking-tight text-[#1d1d1f] sm:text-5xl">
-          {done.length === 0
-            ? "לא נקלטו חשבוניות"
-            : done.length === 1
-              ? "החשבונית נקלטה."
-              : done.length + " חשבוניות נקלטו."}
+          {mode === "review" ? "רגע לפני הטבלה." : doneTitle}
         </h2>
+        {mode === "review" && (
+          <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#6e6e73]">
+            {toSend.length === 0
+              ? "לא נשארו חשבוניות לשליחה."
+              : "שום דבר עוד לא נכנס לטבלה. אפשר לפתוח כל שורה ולבדוק אותה — ואם משהו לא מדויק, עריכה מחזירה לטופס."}
+          </p>
+        )}
         {skipped.length > 0 && (
           <p className="mt-2 text-sm text-[#6e6e73]">{skipped.length + " דולגו"}</p>
         )}
-        {anyDemo && (
+        {mode === "done" && demo && (
           <p className="mx-auto mt-4 inline-block rounded-full bg-[#fdf3df] px-4 py-1.5 text-xs font-medium text-[#8a5a10]">
             מצב הדגמה — שום דבר לא נכתב לטבלה. כך היו נראות השורות
           </p>
@@ -51,14 +90,23 @@ export default function QueueSummary({ items, onReset }: Props) {
             return (
               <div
                 key={it.id}
-                className="rounded-2xl bg-[#f5f5f7] px-5 py-4 text-sm text-[#a1a1a6]"
+                className="flex items-center justify-between rounded-2xl bg-[#f5f5f7] px-5 py-4 text-sm text-[#a1a1a6]"
               >
-                {"חשבונית " + (idx + 1) + " — דולגה"}
+                <span>{"חשבונית " + (idx + 1) + " — דולגה"}</span>
+                {mode === "review" && onEdit && (
+                  <button
+                    type="button"
+                    onClick={() => onEdit(idx)}
+                    className="rounded-full px-3 py-1 text-xs font-semibold text-[#c77e1f] transition-colors hover:bg-[#faf3e3]"
+                  >
+                    בכל זאת לקלוט
+                  </button>
+                )}
               </div>
             );
           }
-          if (it.status !== "done" || !it.result) return null;
-          const s = it.result.summary;
+          if (it.status !== "approved" || !it.approved) return null;
+          const s = it.approved.summary;
           return (
             <details
               key={it.id}
@@ -76,16 +124,40 @@ export default function QueueSummary({ items, onReset }: Props) {
                 <span className="text-xs text-zinc-400">
                   {s.month + " " + s.year + " · חשבונית "}
                   <span className="ltr-field inline-block">{s.invoiceNumber}</span>
-                  {it.result.row !== null && " · שורה " + it.result.row}
+                  {mode === "done" &&
+                    it.committed &&
+                    it.committed.row !== null &&
+                    " · שורה " + it.committed.row}
                 </span>
-                <span className="mr-auto text-zinc-300 transition-transform group-open:rotate-90">
-                  ‹
+                <span className="mr-auto flex items-center gap-2">
+                  {mode === "review" &&
+                    (it.committed ? (
+                      <span className="rounded-full bg-[#e0a339]/15 px-3 py-1 text-xs font-semibold text-[#8a5a10]">
+                        כבר בטבלה
+                      </span>
+                    ) : (
+                      onEdit && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault(); // שלא ייפתח/ייסגר הפירוט מהלחיצה
+                            onEdit(idx);
+                          }}
+                          className="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-[#1d1d1f] shadow-sm transition-all hover:shadow active:scale-95"
+                        >
+                          עריכה
+                        </button>
+                      )
+                    ))}
+                  <span className="text-zinc-300 transition-transform group-open:rotate-90">
+                    ‹
+                  </span>
                 </span>
               </summary>
               <div className="overflow-x-auto border-t border-black/5 px-5 py-4">
                 <table className="w-full text-sm">
                   <tbody>
-                    {it.result.rowPreview.map((cell) => (
+                    {it.approved.rowPreview.map((cell) => (
                       <tr
                         key={cell.col}
                         className={
@@ -116,15 +188,54 @@ export default function QueueSummary({ items, onReset }: Props) {
         })}
       </div>
 
-      <div className="mt-8 text-center">
-        <button
-          type="button"
-          onClick={onReset}
-          className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98]"
-        >
-          קליטת חשבוניות נוספות
-        </button>
-      </div>
+      {mode === "review" && error && (
+        <div className="mt-6 rounded-2xl bg-red-50 p-4 text-sm text-red-800">{error}</div>
+      )}
+
+      {mode === "review" ? (
+        <div className="mt-8 flex flex-col items-center gap-3">
+          {toSend.length > 0 ? (
+            <button
+              type="button"
+              onClick={onSend}
+              disabled={sending}
+              className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98] disabled:opacity-50"
+            >
+              {sendLabel}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onReset}
+              className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98]"
+            >
+              חזרה להתחלה
+            </button>
+          )}
+          {toSend.length > 0 && (
+            <button
+              type="button"
+              disabled={sending}
+              onClick={() => {
+                if (window.confirm("לבטל את הכול? שום שורה לא תיכנס לטבלה.")) onReset();
+              }}
+              className="text-xs text-[#86868b] transition-colors hover:text-[#1d1d1f] disabled:opacity-50"
+            >
+              ביטול הכול בלי לשלוח
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="mt-8 text-center">
+          <button
+            type="button"
+            onClick={onReset}
+            className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98]"
+          >
+            קליטת חשבוניות נוספות
+          </button>
+        </div>
+      )}
     </div>
   );
 }

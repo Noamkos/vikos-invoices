@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // קובץ צד-שלישי שמועתק אוטומטית ב-postinstall — לא קוד שלנו
+    "public/pdf.worker.min.mjs",
   ]),
 ]);
 

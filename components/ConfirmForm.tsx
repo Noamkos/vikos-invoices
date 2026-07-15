@@ -4,7 +4,7 @@
 // א. מה שחולץ מהחשבונית (ניתן לעריכה)  ב. בחירה ממאגר  ג. אופציונלי.
 // שדות שהמודל לא בטוח בהם מודגשים בכתום; שדות חובה חסרים נצבעים באדום אחרי ניסיון שליחה.
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SearchSelect from "./SearchSelect";
 import { HEBREW_MONTHS } from "@/lib/hebrew-dates";
 import { parseAmount } from "@/lib/validate";
@@ -17,9 +17,12 @@ import type {
 
 type Props = {
   data: ExtractSuccess | null;
+  // כשחוזרים לחשבונית שכבר אושרה: הערכים שאושרו ממלאים את הטופס במקום החילוץ
+  initial?: ConfirmRequest | null;
   lists: Lists;
   extractError?: string;
   submitting: boolean;
+  submitLabel: string;
   duplicate?: DuplicateInfo;
   submitError?: string;
   serverFieldErrors?: Record<string, string>;
@@ -42,7 +45,21 @@ type FormState = {
   classification: string;
 };
 
-function initForm(data: ExtractSuccess | null): FormState {
+function initForm(data: ExtractSuccess | null, initial?: ConfirmRequest | null): FormState {
+  if (initial) {
+    return {
+      supplier: initial.supplier,
+      supplierIsNew: initial.supplierIsNew,
+      invoiceNumber: initial.invoiceNumber,
+      month: initial.month,
+      year: String(initial.year),
+      amount: String(Math.round(initial.amountBeforeVat * 100) / 100),
+      project: initial.project,
+      workType: initial.workType,
+      workTypeIsNew: initial.workTypeIsNew,
+      classification: initial.classification,
+    };
+  }
   if (!data) {
     return {
       supplier: "",
@@ -116,9 +133,11 @@ function Field({
 
 export default function ConfirmForm({
   data,
+  initial,
   lists,
   extractError,
   submitting,
+  submitLabel,
   duplicate,
   submitError,
   serverFieldErrors,
@@ -127,14 +146,18 @@ export default function ConfirmForm({
   onCancel,
   cancelLabel = "ביטול",
 }: Props) {
-  const [form, setForm] = useState<FormState>(() => initForm(data));
+  const [form, setForm] = useState<FormState>(() => initForm(data, initial));
   const [showErrors, setShowErrors] = useState(false);
-  // שגיאות מהשרת נשמרות מקומית ונמחקות לשדה ברגע שעורכים אותו
-  const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
+  // שגיאות מהשרת נשמרות מקומית ונמחקות לשדה ברגע שעורכים אותו.
+  // הסנכרון מהפרופ נעשה בזמן הרינדור (הדפוס המומלץ) ולא בתוך effect.
+  const [serverErrors, setServerErrors] = useState<Record<string, string>>(
+    serverFieldErrors ?? {},
+  );
+  const [prevServerFieldErrors, setPrevServerFieldErrors] = useState(serverFieldErrors);
+  if (prevServerFieldErrors !== serverFieldErrors) {
+    setPrevServerFieldErrors(serverFieldErrors);
     setServerErrors(serverFieldErrors ?? {});
-  }, [serverFieldErrors]);
+  }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -185,7 +208,8 @@ export default function ConfirmForm({
     }
     onSubmit({
       supplier: form.supplier.trim(),
-      supplierOfficialName: data?.extracted.supplier_name ?? null,
+      supplierOfficialName:
+        data?.extracted.supplier_name ?? initial?.supplierOfficialName ?? null,
       supplierIsNew: form.supplierIsNew,
       invoiceNumber: form.invoiceNumber.trim(),
       month: form.month,
@@ -195,7 +219,7 @@ export default function ConfirmForm({
       workType: form.workType.trim(),
       workTypeIsNew: form.workTypeIsNew,
       classification: form.classification.trim(),
-      addressHints: data?.extracted.address_or_project_hints ?? [],
+      addressHints: data?.extracted.address_or_project_hints ?? initial?.addressHints ?? [],
       force,
     });
   }
@@ -432,7 +456,7 @@ export default function ConfirmForm({
                 disabled={submitting}
                 className="rounded-xl border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
               >
-                הכנס בכל זאת
+                לאשר בכל זאת
               </button>
               <button
                 type="button"
@@ -458,7 +482,7 @@ export default function ConfirmForm({
             disabled={submitting || !!duplicate}
             className="flex-1 rounded-full bg-[#1d1d1f] px-6 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98] disabled:opacity-50"
           >
-            {submitting ? "מכניסה לטבלה..." : "אישור והכנסה לטבלה"}
+            {submitting ? "בודקת את הפרטים..." : submitLabel}
           </button>
           <button
             type="button"
@@ -469,6 +493,10 @@ export default function ConfirmForm({
             {cancelLabel}
           </button>
         </div>
+
+        <p className="text-center text-xs text-[#86868b]">
+          שום דבר לא נכנס לטבלה בשלב הזה — הכתיבה מתבצעת רק אחרי בדיקה במסך הסיכום.
+        </p>
       </div>
     </div>
   );

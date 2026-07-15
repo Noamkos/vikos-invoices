@@ -108,14 +108,36 @@ export type ConfirmSummary = {
   invoiceNumber: string;
 };
 
-export type ConfirmSuccess = {
+export type DuplicateInfo = { row: number; month: string; year: number };
+
+// --- זרימת שני השלבים של /api/confirm ---
+// "check": בדיקת חשבונית אחת (תקינות + כפילות מול הטבלה) — לא כותב כלום.
+// "commit": שליחת כל התור בבת אחת — הרגע היחיד שבו נכתב לטבלה.
+// ההפרדה מאפשרת לחזור אחורה ולערוך חשבוניות שאושרו, בלי שום סיכון לטבלה.
+
+export type CheckSuccess = {
   ok: true;
-  demo: boolean; // true = מצב הדגמה, שום דבר לא נכתב לגיליון
-  row: number | null;
   rowPreview: RowPreviewCell[];
   summary: ConfirmSummary;
 };
 
-export type DuplicateInfo = { row: number; month: string; year: number };
+export type CheckResponse = CheckSuccess | (ApiError & { duplicate?: DuplicateInfo });
 
-export type ConfirmResponse = ConfirmSuccess | (ApiError & { duplicate?: DuplicateInfo });
+// index = מיקום החשבונית בתור בדפדפן — כדי שכשמשהו נכשל, נדע לאיזו חשבונית לקפוץ
+export type CommitItem = { index: number; req: ConfirmRequest };
+
+export type CommitResult = { index: number; row: number | null };
+
+export type CommitSuccess = {
+  ok: true;
+  demo: boolean; // true = מצב הדגמה, שום דבר לא נכתב לגיליון
+  results: CommitResult[];
+};
+
+export type CommitError = ApiError & {
+  itemIndex?: number; // החשבונית שבגללה נעצרה השליחה
+  duplicate?: DuplicateInfo;
+  written?: CommitResult[]; // בתקלה באמצע הכתיבה: השורות שכבר נכנסו לפני העצירה
+};
+
+export type CommitResponse = CommitSuccess | CommitError;
