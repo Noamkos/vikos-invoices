@@ -5,8 +5,12 @@
 }
 
 body {
-  background: #f6f5f1;
-  color: #1f1f1f;
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
+
+::selection {
+  background: rgba(224, 163, 57, 0.3);
 }
 
 /* שדות של מספרים, תאריכים ומספרי חשבונית בתוך עמוד עברי:

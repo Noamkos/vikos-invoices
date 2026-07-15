@@ -57,7 +57,7 @@ export default function SearchSelect({
         placeholder={placeholder}
         autoComplete="off"
         className={
-          "w-full rounded-lg border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 " +
+          "w-full rounded-xl border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
           borderClass
         }
         onChange={(e) => {
@@ -74,14 +74,14 @@ export default function SearchSelect({
         }}
       />
       {open && (filtered.length > 0 || (allowCreate && query && !exactMatch)) && (
-        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-lg">
+        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
           {filtered.map((o) => (
             <li key={o}>
               <button
                 type="button"
                 className={
-                  "block w-full px-3 py-2 text-right hover:bg-emerald-50 " +
-                  (o === value ? "bg-emerald-50 font-medium" : "")
+                  "block w-full px-3 py-2 text-right hover:bg-[#faf3e3] " +
+                  (o === value ? "bg-[#faf3e3] font-medium" : "")
                 }
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => pick(o)}
@@ -94,7 +94,7 @@ export default function SearchSelect({
             <li className="border-t border-zinc-100">
               <button
                 type="button"
-                className="block w-full px-3 py-2 text-right text-emerald-700 hover:bg-emerald-50"
+                className="block w-full px-3 py-2 text-right text-[#c77e1f] hover:bg-[#faf3e3]"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   onChange(query, true);

@@ -26,6 +26,7 @@ type Props = {
   onSubmit: (req: ConfirmRequest) => void;
   onCancelDuplicate: () => void;
   onCancel: () => void;
+  cancelLabel?: string;
 };
 
 type FormState = {
@@ -124,6 +125,7 @@ export default function ConfirmForm({
   onSubmit,
   onCancelDuplicate,
   onCancel,
+  cancelLabel = "ביטול",
 }: Props) {
   const [form, setForm] = useState<FormState>(() => initForm(data));
   const [showErrors, setShowErrors] = useState(false);
@@ -202,15 +204,15 @@ export default function ConfirmForm({
   const total = data?.extracted.amount_total ?? null;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <div className="rounded-3xl border border-black/5 bg-white p-6 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
       {extractError && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           {extractError + " — אפשר למלא את השדות ידנית מול החשבונית שמוצגת לצד הטופס"}
         </div>
       )}
 
       {data && data.warnings.length > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3">
           <ul className="list-inside list-disc space-y-1 text-sm text-amber-900">
             {data.warnings.map((w) => (
               <li key={w.code}>{w.message}</li>
@@ -221,7 +223,7 @@ export default function ConfirmForm({
 
       <div className="space-y-6">
         <section>
-          <h3 className="mb-3 border-b border-zinc-100 pb-1 text-sm font-bold text-zinc-500">
+          <h3 className="mb-3 text-xs font-bold tracking-widest text-zinc-400">
             חולץ מהחשבונית — לבדוק ולתקן
           </h3>
           <div className="space-y-4">
@@ -259,7 +261,7 @@ export default function ConfirmForm({
                   value={form.month}
                   onChange={(e) => set("month", e.target.value)}
                   className={
-                    "w-full rounded-lg border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 " +
+                    "w-full rounded-xl border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
                     (errors.month
                       ? "border-red-400"
                       : confidenceNotes.month
@@ -282,7 +284,7 @@ export default function ConfirmForm({
                   value={form.year}
                   onChange={(e) => set("year", e.target.value)}
                   className={
-                    "ltr-field w-full rounded-lg border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 " +
+                    "ltr-field w-full rounded-xl border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
                     (errors.year
                       ? "border-red-400"
                       : confidenceNotes.year
@@ -307,7 +309,7 @@ export default function ConfirmForm({
                   value={form.amount}
                   onChange={(e) => set("amount", e.target.value)}
                   className={
-                    "ltr-field w-full rounded-lg border bg-white px-3 py-2 text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500 " +
+                    "ltr-field w-full rounded-xl border bg-white px-3 py-2 text-2xl font-semibold focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
                     (errors.amount
                       ? "border-red-400"
                       : confidenceNotes.amount
@@ -344,7 +346,7 @@ export default function ConfirmForm({
                 value={form.invoiceNumber}
                 onChange={(e) => set("invoiceNumber", e.target.value)}
                 className={
-                  "ltr-field w-full rounded-lg border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 " +
+                  "ltr-field w-full rounded-xl border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
                   (errors.invoiceNumber
                     ? "border-red-400"
                     : confidenceNotes.invoiceNumber
@@ -357,7 +359,7 @@ export default function ConfirmForm({
         </section>
 
         <section>
-          <h3 className="mb-3 border-b border-zinc-100 pb-1 text-sm font-bold text-zinc-500">
+          <h3 className="mb-3 text-xs font-bold tracking-widest text-zinc-400">
             שיוך
           </h3>
           <div className="space-y-4">
@@ -398,7 +400,7 @@ export default function ConfirmForm({
         </section>
 
         <section>
-          <h3 className="mb-3 border-b border-zinc-100 pb-1 text-sm font-bold text-zinc-500">
+          <h3 className="mb-3 text-xs font-bold tracking-widest text-zinc-400">
             אופציונלי
           </h3>
           <Field label="סיווג / הערה" error={errors.classification}>
@@ -407,13 +409,13 @@ export default function ConfirmForm({
               value={form.classification}
               onChange={(e) => set("classification", e.target.value)}
               placeholder="עכבון, מקדמה, גמר חשבון..."
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60"
             />
           </Field>
         </section>
 
         {duplicate && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
             <p className="mb-3 font-semibold text-amber-900">
               {"חשבונית זו כבר קיימת בטבלה (שורה " +
                 duplicate.row +
@@ -428,14 +430,14 @@ export default function ConfirmForm({
                 type="button"
                 onClick={() => handleSubmit(true)}
                 disabled={submitting}
-                className="rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
+                className="rounded-xl border border-amber-400 bg-white px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-50"
               >
                 הכנס בכל זאת
               </button>
               <button
                 type="button"
                 onClick={onCancelDuplicate}
-                className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100"
+                className="rounded-xl px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100"
               >
                 ביטול
               </button>
@@ -444,7 +446,7 @@ export default function ConfirmForm({
         )}
 
         {submitError && !duplicate && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">
             {submitError}
           </div>
         )}
@@ -454,7 +456,7 @@ export default function ConfirmForm({
             type="button"
             onClick={() => handleSubmit(false)}
             disabled={submitting || !!duplicate}
-            className="flex-1 rounded-xl bg-emerald-600 px-6 py-3 text-lg font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-50"
+            className="flex-1 rounded-full bg-[#1d1d1f] px-6 py-3.5 text-lg font-semibold text-white shadow-lg shadow-black/15 transition-all hover:bg-black disabled:opacity-50"
           >
             {submitting ? "מכניסה לטבלה..." : "אישור והכנסה לטבלה"}
           </button>
@@ -462,9 +464,9 @@ export default function ConfirmForm({
             type="button"
             onClick={onCancel}
             disabled={submitting}
-            className="rounded-xl px-5 py-3 text-zinc-500 hover:bg-zinc-100 disabled:opacity-50"
+            className="rounded-full px-5 py-3 text-zinc-500 transition-colors hover:bg-zinc-100 disabled:opacity-50"
           >
-            ביטול
+            {cancelLabel}
           </button>
         </div>
       </div>

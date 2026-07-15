@@ -1,18 +1,20 @@
 "use client";
 
-// העלאת הקובץ + העיבוד בדפדפן שחובה לעשות לפני השליחה:
-// תמונות מוקטנות ל-2000 פיקסלים ונדחסות ל-JPEG (פותר גם את מגבלת 4.5MB של השרת,
-// גם את זה שצילומי אייפון כבדים מדי, וגם מוזיל את קריאת ה-AI).
-// PDF עובר כמו שהוא (עד 4MB). אפשר לבחור כמה תמונות של אותה חשבונית (עמודים).
+// העלאת קבצים — תומך בכמה חשבוניות בבת אחת:
+// - קובץ אחד = חשבונית אחת
+// - כמה קובצי PDF = חשבונית לכל קובץ (PDF הוא מסמך שלם)
+// - כמה תמונות = שואלים: עמודים של אותה חשבונית, או חשבוניות נפרדות?
+// תמונות מוקטנות ל-2000 פיקסלים ונדחסות ל-JPEG לפני השליחה (מגבלת שרת + חיסכון).
 
 import { useRef, useState } from "react";
 
 const MAX_EDGE_PX = 2000;
 const JPEG_QUALITY = 0.8;
 const MAX_FILE_BYTES = 4 * 1024 * 1024;
-const MAX_IMAGES = 8;
+const MAX_PAGES_PER_INVOICE = 8;
+const MAX_FILES_AT_ONCE = 15;
 
-type Props = { onFiles: (files: File[]) => void };
+type Props = { onInvoices: (invoices: File[][]) => void };
 
 async function downscaleImage(file: File): Promise<File> {
   // imageOrientation מיישם את סיבוב ה-EXIF של צילומי טלפון, שלא תישלח תמונה שוכבת
@@ -35,81 +37,172 @@ async function downscaleImage(file: File): Promise<File> {
   return new File([blob], name, { type: "image/jpeg" });
 }
 
-export default function UploadDropzone({ onFiles }: Props) {
+export default function UploadDropzone({ onInvoices }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  // כמה תמונות נבחרו ומחכות לתשובה: עמודים או חשבוניות נפרדות?
+  const [pendingImages, setPendingImages] = useState<File[] | null>(null);
+
+  async function prepareImages(files: File[]): Promise<File[] | null> {
+    const prepared: File[] = [];
+    for (const f of files) {
+      try {
+        prepared.push(await downscaleImage(f));
+      } catch {
+        setError(
+          "לא הצלחנו לקרוא את התמונה " +
+            f.name +
+            " — ייתכן שהיא בפורמט HEIC. באייפון: לבחור מהגלריה (ההמרה אוטומטית) או לשנות בהגדרות המצלמה לפורמט תואם",
+        );
+        return null;
+      }
+    }
+    const tooBig = prepared.find((f) => f.size > MAX_FILE_BYTES);
+    if (tooBig) {
+      setError("גם אחרי דחיסה יש תמונה גדולה מדי — נסו לצלם שוב מקרוב");
+      return null;
+    }
+    return prepared;
+  }
 
   async function handleFiles(list: FileList | File[]) {
     setError(null);
     const files = Array.from(list);
     if (files.length === 0) return;
+    if (files.length > MAX_FILES_AT_ONCE) {
+      setError("אפשר עד " + MAX_FILES_AT_ONCE + " קבצים בכל פעם");
+      return;
+    }
 
+    const bad = files.find(
+      (f) =>
+        !["application/pdf", "image/jpeg", "image/png", "image/webp"].includes(f.type),
+    );
+    if (bad) {
+      setError("הקובץ " + bad.name + " אינו בפורמט נתמך (PDF, JPG, PNG או WebP)");
+      return;
+    }
+
+    const oversizedPdf = files.find(
+      (f) => f.type === "application/pdf" && f.size > MAX_FILE_BYTES,
+    );
+    if (oversizedPdf) {
+      setError("קובץ ה-PDF " + oversizedPdf.name + " גדול מדי (מעל 4MB) — צלמו את העמודים במקום");
+      return;
+    }
+
+    const images = files.filter((f) => f.type !== "application/pdf");
     const pdfs = files.filter((f) => f.type === "application/pdf");
-    if (pdfs.length > 0) {
-      if (files.length > 1) {
-        setError("קובץ PDF יש להעלות לבד, בלי קבצים נוספים");
-        return;
-      }
-      const pdf = pdfs[0];
-      if (pdf.size > MAX_FILE_BYTES) {
-        setError("קובץ ה-PDF גדול מדי (מעל 4MB) — צלמו את העמודים במקום");
-        return;
-      }
-      onFiles([pdf]);
-      return;
-    }
-
-    if (files.length > MAX_IMAGES) {
-      setError("אפשר עד " + MAX_IMAGES + " עמודים לחשבונית אחת");
-      return;
-    }
-
-    const notImage = files.find((f) => !f.type.startsWith("image/"));
-    if (notImage) {
-      setError("הקובץ " + notImage.name + " אינו תמונה או PDF");
-      return;
-    }
 
     setBusy(true);
     try {
-      const prepared: File[] = [];
+      // קובץ יחיד — חשבונית אחת
+      if (files.length === 1) {
+        if (images.length === 1) {
+          const prepared = await prepareImages(images);
+          if (prepared) onInvoices([prepared]);
+        } else {
+          onInvoices([[pdfs[0]]]);
+        }
+        return;
+      }
+
+      // כולן תמונות — צריך לשאול מה הן
+      if (images.length === files.length) {
+        setPendingImages(files);
+        return;
+      }
+
+      // כמה PDF-ים (או תערובת) — כל קובץ הוא חשבונית נפרדת
+      const invoices: File[][] = [];
       for (const f of files) {
-        try {
-          prepared.push(await downscaleImage(f));
-        } catch {
-          setError(
-            "לא הצלחנו לקרוא את התמונה " +
-              f.name +
-              " — ייתכן שהיא בפורמט HEIC. באייפון: לבחור מהגלריה (ההמרה אוטומטית) או לשנות בהגדרות המצלמה לפורמט תואם",
-          );
-          return;
+        if (f.type === "application/pdf") {
+          invoices.push([f]);
+        } else {
+          const prepared = await prepareImages([f]);
+          if (!prepared) return;
+          invoices.push(prepared);
         }
       }
-      const tooBig = prepared.find((f) => f.size > MAX_FILE_BYTES);
-      if (tooBig) {
-        setError("גם אחרי דחיסה התמונה גדולה מדי — נסו לצלם שוב מקרוב");
-        return;
-      }
-      // מגבלת השרת היא על כל הבקשה יחד — בודקים גם את הסכום הכולל
-      const totalBytes = prepared.reduce((sum, f) => sum + f.size, 0);
-      if (totalBytes > MAX_FILE_BYTES) {
-        setError("סך כל התמונות גדול מדי גם אחרי דחיסה — העלו פחות עמודים בכל פעם");
-        return;
-      }
-      onFiles(prepared);
+      onInvoices(invoices);
     } finally {
       setBusy(false);
     }
+  }
+
+  async function resolvePendingImages(asPages: boolean) {
+    const files = pendingImages;
+    setPendingImages(null);
+    if (!files) return;
+    if (asPages && files.length > MAX_PAGES_PER_INVOICE) {
+      setError("לחשבונית אחת אפשר עד " + MAX_PAGES_PER_INVOICE + " עמודים");
+      return;
+    }
+    setBusy(true);
+    try {
+      const prepared = await prepareImages(files);
+      if (!prepared) return;
+      if (asPages) {
+        const total = prepared.reduce((sum, f) => sum + f.size, 0);
+        if (total > MAX_FILE_BYTES) {
+          setError("סך כל העמודים גדול מדי גם אחרי דחיסה — צמצמו את מספר העמודים");
+          return;
+        }
+        onInvoices([prepared]);
+      } else {
+        onInvoices(prepared.map((f) => [f]));
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // מסך השאלה: עמודים או חשבוניות נפרדות?
+  if (pendingImages) {
+    return (
+      <div className="rounded-3xl border border-black/5 bg-white p-10 text-center shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
+        <div className="mb-2 text-4xl" aria-hidden>
+          🤔
+        </div>
+        <h2 className="mb-1 text-xl font-semibold">
+          {"בחרת " + pendingImages.length + " תמונות"}
+        </h2>
+        <p className="mb-8 text-sm text-zinc-500">מה הן?</p>
+        <div className="mx-auto flex max-w-md flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => void resolvePendingImages(false)}
+            className="rounded-full bg-[#1d1d1f] px-8 py-3.5 text-base font-semibold text-white transition-colors hover:bg-black"
+          >
+            {pendingImages.length + " חשבוניות נפרדות"}
+          </button>
+          <button
+            type="button"
+            onClick={() => void resolvePendingImages(true)}
+            className="rounded-full border border-zinc-300 bg-white px-8 py-3.5 text-base font-semibold text-zinc-800 transition-colors hover:border-zinc-400"
+          >
+            עמודים של חשבונית אחת
+          </button>
+          <button
+            type="button"
+            onClick={() => setPendingImages(null)}
+            className="mt-1 text-sm text-zinc-400 hover:text-zinc-600"
+          >
+            ביטול
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div>
       <div
         className={
-          "rounded-2xl border-2 border-dashed p-10 text-center transition-colors " +
-          (dragOver ? "border-emerald-500 bg-emerald-50" : "border-zinc-300 bg-white")
+          "rounded-3xl border bg-white p-12 text-center shadow-[0_2px_24px_rgba(0,0,0,0.06)] transition-all " +
+          (dragOver ? "border-[#e0a339] shadow-[0_2px_32px_rgba(224,163,57,0.25)]" : "border-black/5")
         }
         onDragOver={(e) => {
           e.preventDefault();
@@ -122,22 +215,24 @@ export default function UploadDropzone({ onFiles }: Props) {
           void handleFiles(e.dataTransfer.files);
         }}
       >
-        <div className="mb-4 text-5xl" aria-hidden>
+        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3c266] to-[#e0a339] text-3xl shadow-lg shadow-[#e0a339]/25">
           🧾
         </div>
-        <h2 className="mb-2 text-lg font-semibold text-zinc-800">העלאת חשבונית</h2>
-        <p className="mb-6 text-sm text-zinc-500">
-          PDF, JPG או PNG · אפשר לבחור כמה תמונות של אותה חשבונית (עמוד לכל תמונה)
+        <h2 className="mb-2 text-2xl font-semibold tracking-tight">העלאת חשבוניות</h2>
+        <p className="mx-auto mb-8 max-w-sm text-sm leading-relaxed text-zinc-500">
+          אפשר לבחור כמה חשבוניות בבת אחת — הן ייקלטו אחת אחרי השנייה.
+          <br />
+          PDF, JPG או PNG · גם צילום מהנייד
         </p>
         <button
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="rounded-xl bg-emerald-600 px-8 py-3 text-lg font-semibold text-white shadow hover:bg-emerald-700 disabled:opacity-50"
+          className="rounded-full bg-[#1d1d1f] px-10 py-4 text-lg font-semibold text-white shadow-lg shadow-black/15 transition-all hover:bg-black hover:shadow-xl disabled:opacity-50"
         >
-          {busy ? "מעבד את התמונות..." : "בחירת קובץ או צילום"}
+          {busy ? "מעבדת את הקבצים..." : "בחירת קבצים או צילום"}
         </button>
-        <p className="mt-4 text-xs text-zinc-400">אפשר גם לגרור קובץ לכאן</p>
+        <p className="mt-5 text-xs text-zinc-400">או פשוט לגרור קבצים לכאן</p>
         <input
           ref={inputRef}
           type="file"
@@ -151,7 +246,7 @@ export default function UploadDropzone({ onFiles }: Props) {
         />
       </div>
       {error && (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           {error}
         </div>
       )}

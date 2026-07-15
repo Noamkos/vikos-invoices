@@ -142,7 +142,8 @@ export async function extractInvoice(
   files: InputFile[],
   lists: Lists,
 ): Promise<{ extracted: Extracted; mock: boolean }> {
-  if (!process.env.ANTHROPIC_API_KEY) {
+  // FORCE_MOCK_EXTRACTION=1 מאפשר להדגים/לבדוק את הזרימה בלי לבזבז קרדיט
+  if (!process.env.ANTHROPIC_API_KEY || process.env.FORCE_MOCK_EXTRACTION === "1") {
     return { extracted: MOCK_EXTRACTED, mock: true };
   }
 

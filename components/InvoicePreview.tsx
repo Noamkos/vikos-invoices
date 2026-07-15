@@ -26,7 +26,7 @@ export default function InvoicePreview({ files }: Props) {
   }, [files]);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm">
+    <div className="rounded-3xl border border-black/5 bg-white p-3 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
       <p className="mb-2 px-1 text-sm font-medium text-zinc-500">החשבונית שהועלתה</p>
       <div className="flex max-h-[75vh] flex-col gap-3 overflow-y-auto">
         {items.map((item, i) =>

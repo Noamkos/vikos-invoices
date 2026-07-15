@@ -38,7 +38,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - `app/api/extract/route.ts` — POST חילוץ, GET רשימות (למילוי ידני). `app/api/confirm/route.ts` — אישור והוספה.
 - `app/settings/page.tsx` + `app/api/settings/route.ts` — מסך "⚙️ רשימות": הוספה/הסתרה של ערכים בהשלמה האוטומטית. משפיע רק על ההצעות (כולל הרשימות שנשלחות למודל), לא על אימות ולא על הטבלה. הלוגיקה הטהורה ב-`lib/lists.ts`; האחסון במצב דמו: `data/list-overrides.json` (מחוץ ל-git; ב-Vercel הקובץ זמני — בשלב ב' עובר ללשונית המיפויים).
 - זיהוי "נגמרו הטוקנים": `lib/extraction.ts` מזהה שגיאת credit balance ומחזיר קוד `no_credits` ← המסך מציג "נגמרו הטוקנים של Claude!" ונופל למילוי ידני. אין דרך לדעת מראש שהקרדיט עומד להיגמר (Anthropic לא חושפת יתרה ב-API) — לכן מומלץ להגדיר התראת מייל ב-Console.
-- `app/page.tsx` — מכונת המצבים של המסך. `components/` — הרכיבים.
+- `app/page.tsx` — מכונת המצבים של המסך: **תור חשבוניות** (idle ← queue ← summary). מעלים כמה חשבוניות בבת אחת; החילוץ רץ ברקע בזו אחר זו בזמן שהמשתמשת מאשרת. כמה תמונות ← שאלה "עמודים של חשבונית אחת / נפרדות"; כמה PDF ← אוטומטית נפרדות. `components/` — הרכיבים (כולל `VikosLogo.tsx` — שחזור SVG של הלוגו, ו-`QueueSummary.tsx` — מסך הסיכום).
+- **עיצוב:** שפה בהשראת אפל — רקע ‎#f5f5f7, טקסט ‎#1d1d1f, כתום המותג ‎#e0a339 (מהלוגו), כפתורים ראשיים שחורים מעוגלים (pill), כרטיסים לבנים rounded-3xl. כותרת: "מערכת החשבוניות של ויקי". פוטר: קרדיט noam.k עם קישור לאינסטגרם (instagram.com/noam.k).
+- `FORCE_MOCK_EXTRACTION=1` ב-.env.local — חילוץ מדומה גם כשיש מפתח (להדגמות/בדיקות דפדפן בלי לבזבז קרדיט). לא לשכוח להסיר אחרי!
 - `scripts/test-extract.mjs` — בדיקת חילוץ מהטרמינל (דורש `npm run dev` רץ).
 - `scripts/test-logic.mts` — בדיקות רגרסיה ללוגיקה הטהורה (`npx tsx scripts/test-logic.mts`) — להריץ אחרי כל שינוי ב-lib/. 28 בדיקות, כולן חייבות לעבור.
 

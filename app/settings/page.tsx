@@ -129,7 +129,7 @@ export default function SettingsPage() {
           {KINDS.map(({ key, label, addHint }) => {
             const hiddenSet = new Set(overrides.hidden[key]);
             return (
-              <section key={key} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <section key={key} className="rounded-3xl border border-black/5 bg-white p-5 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
                 <h2 className="mb-3 text-lg font-bold text-zinc-800">{label}</h2>
 
                 <div className="mb-4 flex flex-wrap gap-2">
@@ -151,7 +151,7 @@ export default function SettingsPage() {
                             type="button"
                             title="להחזיר להצעות"
                             onClick={() => unhide(key, v)}
-                            className="font-bold text-emerald-600 hover:text-emerald-800"
+                            className="font-bold text-[#c77e1f] hover:text-[#8a5a10]"
                           >
                             +
                           </button>
@@ -171,15 +171,15 @@ export default function SettingsPage() {
                   {overrides.added[key].map((v) => (
                     <span
                       key={v}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-sm text-emerald-900"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-[#e8c07a] bg-[#faf3e3] px-3 py-1 text-sm text-[#7a5210]"
                     >
                       {v}
-                      <span className="text-[10px] text-emerald-600">נוסף</span>
+                      <span className="text-[10px] text-[#c77e1f]">נוסף</span>
                       <button
                         type="button"
                         title="למחוק את הערך שנוסף"
                         onClick={() => removeAdded(key, v)}
-                        className="font-bold text-emerald-500 hover:text-red-600"
+                        className="font-bold text-[#d29a3f] hover:text-red-600"
                       >
                         ×
                       </button>
@@ -196,12 +196,12 @@ export default function SettingsPage() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") addValue(key);
                     }}
-                    className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60"
                   />
                   <button
                     type="button"
                     onClick={() => addValue(key)}
-                    className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    className="rounded-full bg-[#1d1d1f] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
                   >
                     ➕ הוספה
                   </button>
