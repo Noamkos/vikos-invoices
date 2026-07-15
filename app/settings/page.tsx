@@ -4,6 +4,7 @@
 // חשוב: שום דבר כאן לא משנה את הטבלה — רק את מה שהאתר מציע.
 
 import { useEffect, useState } from "react";
+import TopNav from "@/components/TopNav";
 import type { ListKind, ListOverrides, Lists } from "@/lib/types";
 import { emptyOverrides } from "@/lib/lists";
 
@@ -99,20 +100,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-900">הגדרות רשימות</h1>
-          <p className="mt-1 text-sm text-zinc-500">
-            מה שמוסתר או נוסף כאן משפיע רק על ההשלמה האוטומטית באתר — הטבלה עצמה לא משתנה.
-          </p>
-        </div>
-        <a
-          href="/"
-          className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
-        >
-          → חזרה לקליטה
-        </a>
+    <div className="min-h-dvh bg-white">
+      <TopNav active="settings" />
+      <div className="mx-auto max-w-3xl px-4 py-12">
+      <header className="mb-8">
+        <h1 className="text-4xl font-semibold tracking-tight text-[#1d1d1f]">רשימות.</h1>
+        <p className="mt-2 max-w-lg text-sm leading-relaxed text-[#6e6e73]">
+          מה שמוסתר או נוסף כאן משפיע רק על ההשלמה האוטומטית — הטבלה עצמה לא משתנה.
+        </p>
       </header>
 
       {error && (
@@ -129,7 +124,7 @@ export default function SettingsPage() {
           {KINDS.map(({ key, label, addHint }) => {
             const hiddenSet = new Set(overrides.hidden[key]);
             return (
-              <section key={key} className="rounded-3xl border border-black/5 bg-white p-5 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
+              <section key={key} className="rounded-[28px] bg-[#f5f5f7] p-6">
                 <h2 className="mb-3 text-lg font-bold text-zinc-800">{label}</h2>
 
                 <div className="mb-4 flex flex-wrap gap-2">
@@ -141,8 +136,8 @@ export default function SettingsPage() {
                         className={
                           "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm " +
                           (isHidden
-                            ? "border-zinc-200 bg-zinc-100 text-zinc-400 line-through"
-                            : "border-zinc-300 bg-white text-zinc-800")
+                            ? "border-transparent bg-[#e8e8ed] text-[#a1a1a6] line-through"
+                            : "border-transparent bg-white text-[#1d1d1f]")
                         }
                       >
                         {v}
@@ -196,26 +191,27 @@ export default function SettingsPage() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") addValue(key);
                     }}
-                    className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60"
+                    className="flex-1 rounded-full border border-transparent bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60"
                   />
                   <button
                     type="button"
                     onClick={() => addValue(key)}
                     className="rounded-full bg-[#1d1d1f] px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-black"
                   >
-                    ➕ הוספה
+                    הוספה
                   </button>
                 </div>
               </section>
             );
           })}
 
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-[#86868b]">
             הסתרה מסמנת ערך בקו חוצה והוא מפסיק להופיע בהצעות; לחיצה על + מחזירה אותו.
-            ערכים שנוספו ידנית מסומנים בירוק. בשלב ב׳ ההגדרות יישמרו בגיליון עצמו.
+            ערכים שנוספו ידנית מסומנים בכתום. בשלב ב׳ ההגדרות יישמרו בגיליון עצמו.
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }

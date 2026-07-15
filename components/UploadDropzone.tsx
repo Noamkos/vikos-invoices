@@ -162,33 +162,30 @@ export default function UploadDropzone({ onInvoices }: Props) {
   // מסך השאלה: עמודים או חשבוניות נפרדות?
   if (pendingImages) {
     return (
-      <div className="rounded-3xl border border-black/5 bg-white p-10 text-center shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
-        <div className="mb-2 text-4xl" aria-hidden>
-          🤔
-        </div>
-        <h2 className="mb-1 text-xl font-semibold">
+      <div className="rounded-[28px] bg-[#f5f5f7] p-10 text-center">
+        <h2 className="mb-1 text-2xl font-semibold tracking-tight text-[#1d1d1f]">
           {"בחרת " + pendingImages.length + " תמונות"}
         </h2>
-        <p className="mb-8 text-sm text-zinc-500">מה הן?</p>
+        <p className="mb-8 text-sm text-[#6e6e73]">מה הן?</p>
         <div className="mx-auto flex max-w-md flex-col gap-3">
           <button
             type="button"
             onClick={() => void resolvePendingImages(false)}
-            className="rounded-full bg-[#1d1d1f] px-8 py-3.5 text-base font-semibold text-white transition-colors hover:bg-black"
+            className="rounded-full bg-[#1d1d1f] px-8 py-3.5 text-base font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98]"
           >
             {pendingImages.length + " חשבוניות נפרדות"}
           </button>
           <button
             type="button"
             onClick={() => void resolvePendingImages(true)}
-            className="rounded-full border border-zinc-300 bg-white px-8 py-3.5 text-base font-semibold text-zinc-800 transition-colors hover:border-zinc-400"
+            className="rounded-full bg-white px-8 py-3.5 text-base font-semibold text-[#1d1d1f] transition-all duration-200 hover:bg-[#fbfbfd] active:scale-[0.98]"
           >
             עמודים של חשבונית אחת
           </button>
           <button
             type="button"
             onClick={() => setPendingImages(null)}
-            className="mt-1 text-sm text-zinc-400 hover:text-zinc-600"
+            className="mt-1 text-sm text-[#6e6e73] transition-colors duration-200 hover:text-[#1d1d1f]"
           >
             ביטול
           </button>
@@ -201,8 +198,8 @@ export default function UploadDropzone({ onInvoices }: Props) {
     <div>
       <div
         className={
-          "rounded-3xl border bg-white p-12 text-center shadow-[0_2px_24px_rgba(0,0,0,0.06)] transition-all " +
-          (dragOver ? "border-[#e0a339] shadow-[0_2px_32px_rgba(224,163,57,0.25)]" : "border-black/5")
+          "rounded-[28px] p-12 text-center transition-all duration-300 " +
+          (dragOver ? "bg-[#f8efdd] ring-2 ring-[#e0a339]" : "bg-[#f5f5f7]")
         }
         onDragOver={(e) => {
           e.preventDefault();
@@ -215,11 +212,25 @@ export default function UploadDropzone({ onInvoices }: Props) {
           void handleFiles(e.dataTransfer.files);
         }}
       >
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#f3c266] to-[#e0a339] text-3xl shadow-lg shadow-[#e0a339]/25">
-          🧾
-        </div>
-        <h2 className="mb-2 text-2xl font-semibold tracking-tight">העלאת חשבוניות</h2>
-        <p className="mx-auto mb-8 max-w-sm text-sm leading-relaxed text-zinc-500">
+        <svg
+          viewBox="0 0 24 24"
+          className="mx-auto mb-6 h-12 w-12 text-[#e0a339]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+          <path d="M14 2v5h5" />
+          <path d="M12 17v-6" />
+          <path d="m9.5 13.5 2.5-2.5 2.5 2.5" />
+        </svg>
+        <h2 className="mb-2 text-2xl font-semibold tracking-tight text-[#1d1d1f]">
+          העלאת חשבוניות
+        </h2>
+        <p className="mx-auto mb-8 max-w-sm text-sm leading-relaxed text-[#6e6e73]">
           אפשר לבחור כמה חשבוניות בבת אחת — הן ייקלטו אחת אחרי השנייה.
           <br />
           PDF, JPG או PNG · גם צילום מהנייד
@@ -228,11 +239,11 @@ export default function UploadDropzone({ onInvoices }: Props) {
           type="button"
           disabled={busy}
           onClick={() => inputRef.current?.click()}
-          className="rounded-full bg-[#1d1d1f] px-10 py-4 text-lg font-semibold text-white shadow-lg shadow-black/15 transition-all hover:bg-black hover:shadow-xl disabled:opacity-50"
+          className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98] disabled:opacity-50"
         >
           {busy ? "מעבדת את הקבצים..." : "בחירת קבצים או צילום"}
         </button>
-        <p className="mt-5 text-xs text-zinc-400">או פשוט לגרור קבצים לכאן</p>
+        <p className="mt-5 text-xs text-[#86868b]">או פשוט לגרור קבצים לכאן</p>
         <input
           ref={inputRef}
           type="file"
@@ -246,9 +257,7 @@ export default function UploadDropzone({ onInvoices }: Props) {
         />
       </div>
       {error && (
-        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-          {error}
-        </div>
+        <div className="mt-4 rounded-2xl bg-red-50 p-4 text-sm text-red-800">{error}</div>
       )}
     </div>
   );

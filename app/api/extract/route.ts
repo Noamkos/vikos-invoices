@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
         return fail(
           402,
           "no_credits",
-          "נגמרו הטוקנים של Claude! החילוץ האוטומטי מושבת עד לטעינת קרדיט חדש ב-console.anthropic.com (Billing ← Buy credits). בינתיים אפשר למלא את הפרטים ידנית",
+          "נגמרו הטוקנים של Claude. החילוץ האוטומטי מושבת עד לטעינת קרדיט חדש ב-console.anthropic.com (Billing ← Buy credits). בינתיים אפשר למלא את הפרטים ידנית",
         );
       }
       if (err.code === "bad_key") {

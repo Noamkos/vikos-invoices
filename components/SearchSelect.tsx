@@ -46,7 +46,7 @@ export default function SearchSelect({
     ? "border-red-400"
     : highlight
       ? "border-amber-400"
-      : "border-zinc-300";
+      : "border-transparent";
 
   return (
     <div className="relative">
@@ -57,7 +57,7 @@ export default function SearchSelect({
         placeholder={placeholder}
         autoComplete="off"
         className={
-          "w-full rounded-xl border bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
+          "w-full rounded-xl border bg-white px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#e0a339]/60 " +
           borderClass
         }
         onChange={(e) => {
@@ -74,7 +74,7 @@ export default function SearchSelect({
         }}
       />
       {open && (filtered.length > 0 || (allowCreate && query && !exactMatch)) && (
-        <ul className="absolute z-20 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-zinc-200 bg-white shadow-lg">
+        <ul className="absolute z-20 mt-1.5 max-h-56 w-full overflow-y-auto rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
           {filtered.map((o) => (
             <li key={o}>
               <button
@@ -101,7 +101,7 @@ export default function SearchSelect({
                   setOpen(false);
                 }}
               >
-                {"➕ " + createLabel + ': "' + query + '"'}
+                {"+ " + createLabel + ': "' + query + '"'}
               </button>
             </li>
           )}

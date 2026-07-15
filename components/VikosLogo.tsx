@@ -1,49 +1,45 @@
-// הלוגו של ויקוס — שחזור וקטורי (SVG) של הלוגו: VIKOS בשחור עם ה-i בכתום,
-// והסלוגן "Your home. Our mission." מתחת. וקטורי = חד בכל גודל.
+// הלוגו של ויקוס — בנוי מ-HTML+CSS (לא SVG עם טקסט, שנשבר בדפים בעברית):
+// VIKOS בכתב נטוי כבד, ה-i הוא פס כתום מוטה, והסלוגן מתחת.
+// הגודל נשלט דרך font-size של ההורה (className, למשל text-[40px]) — הכול נמדד ב-em.
 
-type Props = { className?: string; withTagline?: boolean };
+type Props = { className?: string; withTagline?: boolean; light?: boolean };
 
-const INK = "#1d1d1f";
-const ORANGE = "#e0a339";
-
-export default function VikosLogo({ className, withTagline = true }: Props) {
+export default function VikosLogo({
+  className = "",
+  withTagline = true,
+  light = false,
+}: Props) {
   return (
-    <svg
-      viewBox="0 0 240 92"
-      className={className}
+    <span
+      dir="ltr"
       role="img"
       aria-label="VIKOS — Your home. Our mission."
+      className={"inline-flex select-none flex-col items-start leading-none " + className}
     >
-      <g
-        style={{
-          fontFamily: "Arial Black, Arial, sans-serif",
-          fontWeight: 900,
-          fontStyle: "italic",
-        }}
+      <span
+        className={
+          "flex items-baseline font-black italic tracking-[-0.04em] " +
+          (light ? "text-white" : "text-[#1d1d1f]")
+        }
+        style={{ fontFamily: "'Arial Black', 'Segoe UI', Arial, sans-serif" }}
       >
-        <text x="2" y="58" fontSize="56" fill={INK} letterSpacing="-2">
-          V
-        </text>
-        {/* ה-i הכתום המוטה — הסימן המזהה של הלוגו */}
-        <g transform="translate(52 14) skewX(-14)">
-          <rect x="0" y="14" width="11" height="30" fill={ORANGE} />
-          <rect x="1" y="0" width="11" height="10" fill={ORANGE} />
-        </g>
-        <text x="70" y="58" fontSize="56" fill={INK} letterSpacing="-2">
-          KOS
-        </text>
-      </g>
+        <span>V</span>
+        <span
+          aria-hidden
+          className="relative mx-[0.07em] inline-block h-[0.52em] w-[0.14em] -skew-x-[14deg] bg-[#e0a339]"
+        >
+          <span className="absolute right-0 top-[-0.24em] block h-[0.15em] w-full bg-[#e0a339]" />
+        </span>
+        <span>KOS</span>
+      </span>
       {withTagline && (
-        <text
-          x="4"
-          y="82"
-          fontSize="15"
-          fill={ORANGE}
-          style={{ fontFamily: "Arial, sans-serif", fontWeight: 700 }}
+        <span
+          className="mt-[0.16em] text-[0.24em] font-bold tracking-[0.02em] text-[#e0a339]"
+          style={{ fontFamily: "Arial, sans-serif" }}
         >
           Your home. Our mission.
-        </text>
+        </span>
       )}
-    </svg>
+    </span>
   );
 }

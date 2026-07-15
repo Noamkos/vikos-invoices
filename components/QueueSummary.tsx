@@ -13,22 +13,33 @@ export default function QueueSummary({ items, onReset }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="mb-8 text-center">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#f3c266] to-[#e0a339] text-3xl text-white shadow-lg shadow-[#e0a339]/25">
-          ✓
+      <div className="mb-10 text-center">
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-[#e0a339]">
+          <svg
+            viewBox="0 0 24 24"
+            className="h-7 w-7 text-white"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
         </div>
-        <h2 className="text-3xl font-light tracking-tight text-[#1d1d1f]">
+        <h2 className="text-4xl font-semibold tracking-tight text-[#1d1d1f] sm:text-5xl">
           {done.length === 0
             ? "לא נקלטו חשבוניות"
             : done.length === 1
-              ? "החשבונית נקלטה"
-              : done.length + " חשבוניות נקלטו"}
+              ? "החשבונית נקלטה."
+              : done.length + " חשבוניות נקלטו."}
         </h2>
         {skipped.length > 0 && (
-          <p className="mt-1 text-sm text-zinc-500">{skipped.length + " דולגו"}</p>
+          <p className="mt-2 text-sm text-[#6e6e73]">{skipped.length + " דולגו"}</p>
         )}
         {anyDemo && (
-          <p className="mx-auto mt-3 max-w-md rounded-full bg-amber-100 px-4 py-1.5 text-xs font-medium text-amber-800">
+          <p className="mx-auto mt-4 inline-block rounded-full bg-[#fdf3df] px-4 py-1.5 text-xs font-medium text-[#8a5a10]">
             מצב הדגמה — שום דבר לא נכתב לטבלה. כך היו נראות השורות
           </p>
         )}
@@ -40,7 +51,7 @@ export default function QueueSummary({ items, onReset }: Props) {
             return (
               <div
                 key={it.id}
-                className="rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm text-zinc-400"
+                className="rounded-2xl bg-[#f5f5f7] px-5 py-4 text-sm text-[#a1a1a6]"
               >
                 {"חשבונית " + (idx + 1) + " — דולגה"}
               </div>
@@ -51,7 +62,7 @@ export default function QueueSummary({ items, onReset }: Props) {
           return (
             <details
               key={it.id}
-              className="group rounded-2xl border border-black/5 bg-white shadow-[0_2px_16px_rgba(0,0,0,0.05)]"
+              className="group rounded-2xl bg-[#f5f5f7] transition-colors duration-200 open:bg-[#f0f0f2]"
             >
               <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-5 py-4">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#e0a339]/15 text-sm font-bold text-[#c77e1f]">
@@ -71,7 +82,7 @@ export default function QueueSummary({ items, onReset }: Props) {
                   ‹
                 </span>
               </summary>
-              <div className="overflow-x-auto border-t border-zinc-100 px-5 py-4">
+              <div className="overflow-x-auto border-t border-black/5 px-5 py-4">
                 <table className="w-full text-sm">
                   <tbody>
                     {it.result.rowPreview.map((cell) => (
@@ -109,7 +120,7 @@ export default function QueueSummary({ items, onReset }: Props) {
         <button
           type="button"
           onClick={onReset}
-          className="rounded-full bg-[#1d1d1f] px-10 py-4 text-lg font-semibold text-white shadow-lg shadow-black/15 transition-all hover:bg-black"
+          className="rounded-full bg-[#1d1d1f] px-10 py-3.5 text-[17px] font-semibold text-white transition-all duration-200 hover:bg-black active:scale-[0.98]"
         >
           קליטת חשבוניות נוספות
         </button>

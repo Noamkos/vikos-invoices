@@ -26,8 +26,8 @@ export default function InvoicePreview({ files }: Props) {
   }, [files]);
 
   return (
-    <div className="rounded-3xl border border-black/5 bg-white p-3 shadow-[0_2px_24px_rgba(0,0,0,0.06)]">
-      <p className="mb-2 px-1 text-sm font-medium text-zinc-500">החשבונית שהועלתה</p>
+    <div className="rounded-[28px] bg-[#f5f5f7] p-3">
+      <p className="mb-2 px-2 pt-1 text-sm font-medium text-[#6e6e73]">החשבונית שהועלתה</p>
       <div className="flex max-h-[75vh] flex-col gap-3 overflow-y-auto">
         {items.map((item, i) =>
           item.isPdf ? (
@@ -35,7 +35,7 @@ export default function InvoicePreview({ files }: Props) {
               key={item.url}
               src={item.url}
               title={item.name}
-              className="h-[70vh] w-full rounded-lg border border-zinc-100"
+              className="h-[70vh] w-full rounded-2xl"
             />
           ) : (
             // eslint-disable-next-line @next/next/no-img-element
@@ -43,7 +43,7 @@ export default function InvoicePreview({ files }: Props) {
               key={item.url}
               src={item.url}
               alt={"עמוד " + (i + 1)}
-              className="w-full rounded-lg border border-zinc-100"
+              className="w-full rounded-2xl"
             />
           ),
         )}

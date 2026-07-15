@@ -4,8 +4,12 @@
   color-scheme: light;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: #f5f5f7;
+  background: #ffffff;
   color: #1d1d1f;
 }
 
@@ -14,9 +18,11 @@ body {
 }
 
 /* שדות של מספרים, תאריכים ומספרי חשבונית בתוך עמוד עברי:
-   הספרות מוצגות תמיד משמאל לימין כדי שמינוס ומקפים לא יתהפכו */
+   הספרות מוצגות תמיד משמאל לימין כדי שמינוס ומקפים לא יתהפכו,
+   ובספרות ברוחב אחיד כדי שסכומים יתיישרו יפה */
 .ltr-field {
   direction: ltr;
   unicode-bidi: isolate;
   text-align: left;
+  font-variant-numeric: tabular-nums;
 }

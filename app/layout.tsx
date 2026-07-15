@@ -5,7 +5,7 @@ import "./globals.css";
 const heebo = Heebo({ subsets: ["hebrew", "latin"] });
 
 export const metadata: Metadata = {
-  title: "קליטת חשבוניות — ויקוס הנדסה",
+  title: "מערכת החשבוניות של ויקי — ויקוס הנדסה",
   description: "העלאת חשבונית ספק, חילוץ אוטומטי והכנסה לטבלת בסיס הנתונים",
 };
 
